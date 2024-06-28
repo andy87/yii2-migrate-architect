@@ -143,7 +143,7 @@ Select action:
 action: 1
 
 Table name: product
-Create new migration 'W:\localhost\_self\github.com\yii2-app-advanced-soa\app\console/migrations\m240628_072029_create_table__product.php'? (yes|no) [no]:y
+Create new migration '../console/migrations\m240628_072029_create_table__product.php'? (yes|no) [no]:y
 New migration created successfully.
 
 ```
