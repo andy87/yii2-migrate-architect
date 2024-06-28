@@ -14,14 +14,7 @@ _Разумеется, это не конкурент, а просто попы�
 ### Содержание:
 
 - [Установка](#yii2-migrate-architect-setup)
-- [Использование](#yii2-migrate-architect-setup)
-- [Объект - Базовый класс](#yii2-migrate-architect-src-Operator)
-- [Объект - Запрос](#yii2-migrate-architect-src-Request)
-- [Объект - Ответ](#yii2-migrate-architect-src-Response)
-- [Дополнительные возможности](#yii2-migrate-architect-src-feature)
-- [Расширение на основе базового класса](#yii2-migrate-architect-extends)
-- [Пример Custom реализации](#yii2-migrate-architect-Custom)
-- [Тесты](#yii2-migrate-architect-tests)
+- [Использование](#yii2-migrate-architect-use)
 
 ___
 
@@ -62,17 +55,66 @@ php composer.phar require andy87/yii2-migrate-architect
 
 <p align="center">- - - - -</p>
 
+В конфигурационном файле `config/web.php` добавить контроллер:  
+`andy87\yii2\architect\components\controllers\ArchitectController`
+```php
+use andy87\yii2\architect\components\controllers\ArchitectController;
+
+return [
+    // ...
+    'controllerMap' => [
+        // ...
+    
+        'architect' => ArchitectController::class,
+        // ...
+    ],
+    // ...
+];
+
+```
+Кастомизация:
+ - **ns** _namespace миграций_
+ - **directoryTemplateMigrations** _путь к шаблонам миграций_
+ - **migrateTemplateMapping** _маппинг шаблонов миграций_
+ - **snippetsMigrationFilename** _шаблоны для генерации части имени файла миграпции_
+```php
+use andy87\yii2\architect\components\controllers\ArchitectController;
+
+return [
+    // ...
+    'controllerMap' => [
+        // ...
+    
+        'architect' => [
+            'class' => ArchitectController::class,
+            'ns' => 'name/space',
+            'directoryTemplateMigrations' => '@app/path/to/migrations/template/',
+            'migrateTemplateMapping' => [
+                ArchitectController::MIGRATE_ADD => 'create_table_template',
+                ArchitectController::MIGRATE_UPDATE => 'update_table_template',
+            ],
+        ],
+        // ...
+    ],
+    // ...
+];
 ___
 
 
 
-<h2>Логика работы библиотеки (блок-схема)</h2> <span id="yii2-migrate-architect-logic-schema"></span>
+## Простые примеры <span id="yii2-migrate-architect-use"></span>
 
-
-1. 
-
-## Простые примеры
-
+Консольная команда:
+```bash
+  php yii architect
+```
+Запускает интерактивное меню для:
+ - запуска миграций
+ - создания миграций
+   - с предустановленными шаблонами миграций использующих базовые классы:
+     - `andy87\yii2\architect\CreateTable`
+     - `andy87\yii2\architect\UpdateTable`
+ 
 ### CreateTable.
 
 #### Создание таблицы

@@ -1,0 +1,28 @@
+{
+  "name": "andy87/yii2-migrate-architect",
+  "description": "PHP library for Yii2 - developed by and_y87",
+  "keywords": ["and_y87", "php", "migration", "architect"],
+  "homepage": "https://andy87.ru",
+  "license": "CC-BY-SA-4.0",
+
+  "version": "1.0.0",
+  "minimum-stability": "dev",
+
+  "authors": [
+    {
+      "name": "Kidin Andrey",
+      "email": "kidin_a@list.ru"
+    }
+  ],
+
+  "require": {
+    "php": ">=8.0",
+    "yiisoft/yii2": "*"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "andy87\\yii2\\architect": "src/"
+    }
+  }
+}
