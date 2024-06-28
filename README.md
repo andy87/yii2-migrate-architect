@@ -51,8 +51,8 @@ php composer.phar require andy87/yii2-migrate-architect
 
 <p align="center">- - - - -</p>
 
-В конфигурационном файле `config/web.php` добавить контроллер:  
-`andy87\yii2\architect\components\controllers\ArchitectController`
+В консольном конфигурационном файле добавить контроллер:  `ArchitectController`  
+
 ```php
 use andy87\yii2\architect\components\controllers\ArchitectController;
 
@@ -60,19 +60,19 @@ return [
     // ...
     'controllerMap' => [
         // ...
-    
         'architect' => ArchitectController::class,
         // ...
     ],
     // ...
 ];
-
 ```
-Кастомизация:
+
+#### Кастомизация:
  - **ns** _namespace миграций_
  - **directoryTemplateMigrations** _путь к шаблонам миграций_
  - **migrateTemplateMapping** _маппинг шаблонов миграций_
  - **snippetsMigrationFilename** _шаблоны для генерации части имени файла миграпции_
+
 ```php
 use andy87\yii2\architect\components\controllers\ArchitectController;
 
@@ -102,18 +102,45 @@ return [
 ___
 
 ## Использование <span id="yii2-migrate-architect-use"></span>
-
-
-Консольная команда:
+Основная точка входа - консольнаякоманда:
 ```bash
   php yii architect
 ```
-Запускает интерактивное меню для:
- - запуска миграций
- - создания миграций
-   - с предустановленными шаблонами миграций использующих базовые классы:
+Запускает интерактивное меню для выбора действий:
+ - применение всех миграций
+ - применение нескольких миграций
+ - откат миграций
+ - создание файлов миграций
+   - с предустановленными шаблонами использующих базовые классы:
      - `andy87\yii2\architect\CreateTable`
      - `andy87\yii2\architect\UpdateTable`
+
+```
+> php yii architect                             
+Yii Migration Tool (based on Yii v2.0.51-dev)
+
+Select action:
+ 1. Setup migrations
+ 2. Create migration
+ 3. Apply migrations
+ 4. Down migrations
+ 0. Exit
+--------------------
+ variant: 2
+`Create migration`:
+ 1. Create table
+ 2. Update column
+ 3. Add column
+ 4. Rename column
+ 5. Remove column
+ 0. Exit
+--------------------
+action: 1
+
+Table name: product
+Create new migration 'W:\localhost\_self\github.com\yii2-app-advanced-soa\app\console/migrations\m240628_072029_create_table__product.php'? (yes|no) [no]:y
+New migration created successfully.
+```
 
 ___
 
