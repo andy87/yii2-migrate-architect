@@ -120,6 +120,34 @@ ___
         - `andy87\yii2\architect\CreateTable`
         - `andy87\yii2\architect\UpdateTable`
 
+```
+> php yii architect                             
+Yii Migration Tool (based on Yii v2.0.51-dev)
+
+Select action:
+ 1. Setup migrations
+ 2. Create migration
+ 3. Apply migrations
+ 4. Down migrations
+ 0. Exit
+--------------------
+ variant: 2
+`Create migration`:
+ 1. Create table
+ 2. Update column
+ 3. Add column
+ 4. Rename column
+ 5. Remove column
+ 0. Exit
+--------------------
+action: 1
+
+Table name: product
+Create new migration 'W:\localhost\_self\github.com\yii2-app-advanced-soa\app\console/migrations\m240628_072029_create_table__product.php'? (yes|no) [no]:y
+New migration created successfully.
+
+```
+
 ___
 
 ## Простые примеры миграций
