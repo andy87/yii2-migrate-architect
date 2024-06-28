@@ -148,6 +148,7 @@ New migration created successfully.
 
 ```
 
+P.S. миграция не полностью пишется за разработчика, всё же руками что-то добавить придётся.
 ___
 
 ## Простые примеры миграций
@@ -164,7 +165,7 @@ use andy87\yii2\architect\CreateTable;
 /**
  * Class m240626_210742_create_table__role
  */
-class m240626_210742_add_table__role extends CreateTable
+class m240626_210742_create_table__role extends CreateTable
 {
     /** @var string Название таблицы */
     protected string $tableName = '{{%role}}';
@@ -191,12 +192,12 @@ class m240626_210742_add_table__role extends CreateTable
 use andy87\yii2\architect\CreateTable;
 
 /**
- * Class m240626_210741_add_table__log
+ * Class m240626_210741_create_table__log
  */
-class m240626_210741_add_table__log extends CreateTable
+class m240626_210741_create_table__log extends CreateTable
 {
     /** @var string Название таблицы */
-    protected string $tableName = '{{%log}}';
+    protected string $tableName = 'log';
     
     /**
      * @return array
@@ -227,12 +228,12 @@ use andy87\yii2\architect\UpdateTable;
 
 
 /**
- * Class m240626_210729_ext_table__user
+ * Class m240626_210729_update_table__user
  */
-class m240626_210729_ext_table__user extends UpdateTable
+class m240626_210729_update_table__user extends UpdateTable
 {
     /** @var string Название таблицы */
-    protected string $tableName = '{{%user}}';
+    protected string $tableName = 'user';
 
     /**
      * Список колонок для добавления
@@ -257,9 +258,9 @@ use andy87\yii2\architect\UpdateTable;
 
 
 /**
- * Class m240626_210728_ext_table__category
+ * Class m240626_210728_update_table__category
  */
-class m240626_210728_ext_table__category extends UpdateTable
+class m240626_210728_update_table__category extends UpdateTable
 {
     /** @var string Название таблицы */
     protected string $tableName = 'category';
@@ -299,10 +300,10 @@ use app\common\models\sources\Role;
 /**
  * Class m240626_210729_update_table__user
  */
-class m240626_210729_ext_table__user extends UpdateTable
+class m240626_210729_update_table__user extends UpdateTable
 {
     /** @var string Название таблицы */
-    protected string $tableName = '{{%user}}';
+    protected string $tableName = 'user';
 
     /**
      * Список колонок для изменения
@@ -327,9 +328,9 @@ use app\common\models\sources\Role;
 use andy87\yii2\architect\UpdateTable;
 
 /**
- * Class m240626_210725_ext_table__product
+ * Class m240626_210725_update_table__product
  */
-class m240626_210725_ext_table__product extends UpdateTable
+class m240626_210725_update_table__product extends UpdateTable
 {
     /** @var string Название таблицы */
     protected string $tableName = 'product';
@@ -350,12 +351,12 @@ use app\common\models\sources\Role;
 use andy87\yii2\architect\UpdateTable;
 
 /**
- * Class m240626_210735_ext_table__servcie
+ * Class m240626_210735_update_table__service
  */
-class m240626_210735_ext_table__servcie extends UpdateTable
+class m240626_210735_update_table__service extends UpdateTable
 {
     /** @var string Название таблицы */
-    protected string $tableName = 'servcie';
+    protected string $tableName = 'service';
 
     /** @var array Список колонок для удаления */
     protected array $removeColumnList = [
