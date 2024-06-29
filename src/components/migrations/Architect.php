@@ -182,7 +182,7 @@ abstract class Architect extends Migration
      *
      * @throws Exception
      */
-    private function getForeignData( string|int $TableNameOrColumnName, string|array $columnOrParams): array
+    protected function getForeignData( string|int $TableNameOrColumnName, string|array $columnOrParams): array
     {
         if ( is_string($columnOrParams) )
         {
