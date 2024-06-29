@@ -153,7 +153,9 @@ abstract class UpdateTable extends components\migrations\Architect
     {
         $columns = ($command == self::COMMAND_UP ) ? $columns : array_flip($columns);
 
-        $this->processUpdate(self::ACTION_EDIT, $columns);
+        $tableName = $this->getTableName();
+
+        $this->processUpdate(self::ACTION_EDIT, $tableName, $columns);
     }
 
     /**
@@ -163,7 +165,9 @@ abstract class UpdateTable extends components\migrations\Architect
      */
     private function processEdit(array $columns): void
     {
-        $this->processUpdate(self::ACTION_ADD, $columns );
+        $tableName = $this->getTableName();
+
+        $this->processUpdate(self::ACTION_ADD, $tableName, $columns );
     }
 
     /**
@@ -186,16 +190,15 @@ abstract class UpdateTable extends components\migrations\Architect
 
     /**
      * @param int $action
-     * @param $columns
+     * @param string $tableName
+     * @param array $columns
      *
      * @return void
      */
-    private function processUpdate( int $action, $columns ): void
+    private function processUpdate( int $action, string $tableName, array $columns ): void
     {
         if ( count($columns) )
         {
-            $tableName = $this->getTableName();
-            
             foreach ( $columns as $column => $config )
             {
                 match ($action)
