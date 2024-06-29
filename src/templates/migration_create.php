@@ -31,7 +31,7 @@ class <?= $className ?> extends CreateTable
 
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function columns(): array
     {

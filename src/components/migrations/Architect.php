@@ -233,7 +233,6 @@ abstract class Architect extends Migration
         return [ $column, $refTableName, $refColumnName ];
     }
 
-
     /**
      * Опции для таблицы
      *
@@ -249,6 +248,8 @@ abstract class Architect extends Migration
      */
     protected function getTableName(): string
     {
-        return $this->db->quoteTableName($this->tableName);
+        $tableName = $this->db->quoteSql($this->tableName);
+
+        return trim($tableName, '`');
     }
 }

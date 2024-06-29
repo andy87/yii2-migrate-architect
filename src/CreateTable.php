@@ -12,7 +12,7 @@ use yii\console\{ ExitCode, Exception };
  */
 abstract class CreateTable extends components\migrations\Architect
 {
-    /** @var ?string Комментарий таблицы */
+    /** @var string Комментарий таблицы */
     protected string $tableComment = '';
 
 
@@ -71,13 +71,13 @@ abstract class CreateTable extends components\migrations\Architect
                     $columns[$key] = $this->getSchemaDateTime($label);
                         break;
                 }
-            } elseif (!$columnList[$key]) {
+            } elseif (!$columns[$key]) {
 
-                unset($columnList[$key]);
+                unset($columns[$key]);
             }
         }
 
-        return $columnList;
+        return $columns;
     }
 
     /**
@@ -106,11 +106,12 @@ abstract class CreateTable extends components\migrations\Architect
             ->append("ON UPDATE $expression")
             ->comment($comment);
     }
-    
 
 
     /**
      * @return int
+     *
+     * @throws Exception
      */
     final public function safeDown(): int
     {

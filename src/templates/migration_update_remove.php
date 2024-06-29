@@ -35,7 +35,7 @@ class <?= $className ?> extends UpdateTable
 
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rollBackKeys(): array
     {
@@ -46,7 +46,7 @@ class <?= $className ?> extends UpdateTable
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rollBackColumns(): array
     {

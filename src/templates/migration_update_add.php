@@ -32,7 +32,7 @@ class <?= $className ?> extends UpdateTable
 
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function columnsListAdd(): array
     {

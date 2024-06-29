@@ -35,17 +35,18 @@ class <?= $className ?> extends UpdateTable
 
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function columnsListAdd(): array
     {
         return [
-            //'column' => 'type',
+            //'column' => $this->string(64)->notNull()->unique(),
+            //'column' => 'VARCHAR(255) NOT NULL AFTER `column`',
         ];
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function columnsListEdit(): array
     {
@@ -55,7 +56,7 @@ class <?= $className ?> extends UpdateTable
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function rollBackKeys(): array
     {
@@ -65,8 +66,8 @@ class <?= $className ?> extends UpdateTable
     }
 
     /**
-    * {@inheritdoc}
-    */
+     * @return array
+     */
     public function rollBackColumns(): array
     {
         return [
