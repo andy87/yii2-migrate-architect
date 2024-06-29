@@ -77,7 +77,7 @@ abstract class UpdateTable extends components\migrations\Architect
 
         $this->processEdit ($this->columnsListEdit() );
 
-        $this->processAdd( $this->columnsListAdd() );
+        $this->processAdd( self::COMMAND_UP, $this->columnsListAdd() );
 
         return parent::safeUp();
     }
@@ -101,7 +101,7 @@ abstract class UpdateTable extends components\migrations\Architect
             }
 
             if ( count($rollBackColumns = $this->rollBackColumns()) ) {
-                $this->processAdd( $rollBackColumns );
+                $this->processAdd( self::COMMAND_DOWN, $rollBackColumns );
             }
 
             if ( count($rollBackKeys = $this->rollBackKeys()) ) {
@@ -174,19 +174,34 @@ abstract class UpdateTable extends components\migrations\Architect
     }
 
     /**
+     * @param string $command
      * @param array $columns
      *
      * @return void
+     *
+     * @throws \yii\console\Exception
      */
-    private function processAdd( array $columns ): void
+    private function processAdd( string $command, array $columns ): void
     {
         if ( count($columns) )
         {
             $tableName = $this->getTableName();
 
-            foreach ($columns as $column => $params )
+            if ($command === self::COMMAND_UP )
             {
-                $this->addColumn($tableName, $column, $params);
+                foreach ($columns as $column => $params )
+                {
+                    $this->addColumn($tableName, $column, $params);
+                }
+            } elseif ($command === self::COMMAND_DOWN) {
+
+                if ( count($this->foreignKeyList) ) {
+                    $this->prepareForeignKeys(self::COMMAND_DOWN, $this->foreignKeyList);
+                }
+
+                $columns = array_keys($columns);
+
+                $this->processRemove($columns);
             }
         }
     }
