@@ -155,7 +155,10 @@ abstract class UpdateTable extends components\migrations\Architect
 
         $tableName = $this->getTableName();
 
-        $this->processUpdate(self::ACTION_EDIT, $tableName, $columns);
+        foreach ( $columns as $oldName => $newName )
+        {
+            $this->renameColumn($tableName, $oldName, $newName);
+        }
     }
 
     /**
