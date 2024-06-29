@@ -167,7 +167,7 @@ abstract class UpdateTable extends components\migrations\Architect
     {
         $tableName = $this->getTableName();
 
-        $this->processUpdate(self::ACTION_ADD, $tableName, $columns );
+        $this->processUpdate(self::ACTION_EDIT, $tableName, $columns );
     }
 
     /**
