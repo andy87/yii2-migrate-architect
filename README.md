@@ -56,7 +56,7 @@ php composer.phar require andy87/yii2-migrate-architect
 
 <p align="center">- - - - -</p>
 
-В конфигурационном файле `config/web.php` добавить контроллер:  
+В конфигурационном файле `config/console.php` добавить контроллер:  
 `andy87\yii2\architect\components\controllers\ArchitectController`
 ```php
 use andy87\yii2\architect\components\controllers\ArchitectController;
