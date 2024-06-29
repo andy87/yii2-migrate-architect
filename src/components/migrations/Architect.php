@@ -69,25 +69,6 @@ abstract class Architect extends Migration
     protected array $foreignKeyList = [];
 
 
-    /**
-     * @return void
-     * 
-     * @throws Exception
-     */
-    public function up(): void
-    {
-        throw new Exception('Method "up" not implemented');
-    }
-
-    /**
-     * @return void
-     * 
-     * @throws Exception
-     */
-    public function down(): void
-    {
-        throw new Exception('Method "down" not implemented');
-    }
 
     /**
      * @return int
