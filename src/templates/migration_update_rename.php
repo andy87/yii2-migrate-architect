@@ -20,10 +20,11 @@ use andy87\yii2\architect\UpdateTable;
  */
 class <?= $className ?> extends UpdateTable
 {
-    protected string $scenario = self::SCENARIO_COLUMN_RENAME;
+    /** @var string Сценарий */
+    public string $scenario = self::SCENARIO_COLUMN_RENAME;
 
     /** @var string Название таблицы */
-    protected string $tableName = '<?= $tableName ?>';
+    public string $tableName = '<?= $tableName ?>';
 
 
 

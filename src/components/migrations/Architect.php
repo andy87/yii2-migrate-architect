@@ -42,10 +42,10 @@ abstract class Architect extends Migration implements ArchitectInterface
 
 
     /** @var int Сценарий */
-    protected int $scenario;
+    public int $scenario;
 
     /** @var string Имя таблицы */
-    protected string $tableName;
+    public string $tableName;
 
     /** @var array Список колонок, созданных по умолчанию */
     protected array $columnLabels = [

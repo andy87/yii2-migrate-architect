@@ -19,10 +19,11 @@ use andy87\yii2\architect\UpdateTable;
  */
 class <?= $className ?> extends UpdateTable
 {
-    protected string $scenario = self::SCENARIO_COLUMN_ADD;
+    /** @var string Сценарий */
+    public string $scenario = self::SCENARIO_COLUMN_ADD;
 
     /** @var string Название таблицы */
-    protected string $tableName = '<?= $tableName ?>';
+    public string $tableName = '<?= $tableName ?>';
 
 
     /** @var array Список внешних ключей */

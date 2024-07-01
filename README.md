@@ -1,8 +1,6 @@
 
 <h1 align="center">Yii2 migrate architect</h1>
 
-<p align="center"><img src="assets/logo/yii2-migrate-architectLogo_256.png" style="width:256px; height: auto" alt="yii2-migrate-architect php curl facade"/></p>
-
 Yii2 migrate architect - библиотека для фреймворка Yii2 упрощающая написание кода миграций. 
 
 Цель: сделать простой и быстрый инструмент добавления миграций.
@@ -67,12 +65,12 @@ return [
     // ...
 ];
 
+
 ```
-Кастомизация:
-- **ns** _namespace миграций_
+Пример с кастомизацией:
 - **directoryTemplateMigrations** _путь к шаблонам миграций_
 - **migrateTemplateMapping** _маппинг шаблонов миграций_
-- **snippetsMigrationFilename** _шаблоны для генерации части имени файла миграпции_
+- **snippetsMigrationFilename** _шаблоны имён файлов миграции_
 
 ```php
 use andy87\yii2\architect\components\controllers\ArchitectController;
@@ -84,7 +82,6 @@ return [
     
         'architect' => [
             'class' => ArchitectController::class,
-            'ns' => 'name/space',
             'directoryTemplateMigrations' => '@app/path/to/migrations/template/',
             'migrateTemplateMapping' => [
                 ArchitectController::SCENARIO_COLUMN_ADD => 'create_table_template',
@@ -92,8 +89,8 @@ return [
                 //,,,
             ],
             'snippetsMigrationFilename' => [
-                ArchitectController::SCENARIO_COLUMN_ADD => 'create_table_%s',
-                ArchitectController::SCENARIO_UPDATE => 'update_table_%s',
+                ArchitectController::SCENARIO_COLUMN_ADD => 'create_table__%s',
+                ArchitectController::SCENARIO_UPDATE => 'update_table__%s',
                 //,,,
             ]
         ],
@@ -123,10 +120,10 @@ ___
 Yii Migration Tool (based on Yii v2.0.51-dev)
 
 Select action:
- 1. Setup migrations
- 2. Create migration
- 3. Apply migrations
- 4. Down migrations
+ 1. Create migration
+ 2. Apply migrations
+ 3. Down migrations
+ 4. Run migrations
  0. Exit
 --------------------
  variant: 2
@@ -146,7 +143,6 @@ New migration created successfully.
 
 ```
 
-P.S. все rollBack функции и миграции add/update не полностью пишется за разработчика.
 ___
 
 ## Простые примеры миграций
@@ -165,20 +161,18 @@ use andy87\yii2\architect\CreateTable;
  */
 class m240626_210742_create_table__role extends CreateTable
 {
-    protected string $scenario = self::SCENARIO_CREATE;
+    public string $scenario = self::SCENARIO_CREATE;
 
     /** @var string Название таблицы */
-    protected string $tableName = '{{%role}}';
+    public string $tableName = '{{%role}}';
     
     /** 
-     * @var array Список для генерации внешних ключей 
-     * для примера добавлены два внешних ключа:
-     * - fk--role-module_id--module-id
-     * - fk--role-sub_module_id--module-id  
+     * @var array Список для генерации внешних ключей.
+     * Для примера добавлены два внешних ключа.
      */
-    protected array $foreignKeyList = [
-        'module' => 'id', // 
-        'sub_module_id' => ['module' => 'id'],
+    public array $foreignKeyList = [
+        'module' => 'id', // fk--role-module_id--module-id
+        'sub_module_id' => ['module' => 'id'], // fk--role-sub_module_id--module-id  
     ];
 
     /**
@@ -209,10 +203,10 @@ use andy87\yii2\architect\CreateTable;
  */
 class m240626_210741_create_table__log extends CreateTable
 {
-    protected string $scenario = self::SCENARIO_CREATE;
+    public string $scenario = self::SCENARIO_CREATE;
 
     /** @var string Название таблицы */
-    protected string $tableName = 'log';
+    public string $tableName = 'log';
     
     /**
      * @return array
@@ -243,8 +237,10 @@ use andy87\yii2\architect\UpdateTable;
  */
 class m240626_210729_update_table__user extends UpdateTable
 {
+    public string $scenario = self::SCENARIO_COLUMN_ADD;
+    
     /** @var string Название таблицы */
-    protected string $tableName = 'user';
+    public string $tableName = 'user';
 
     /**
      * Список колонок для добавления
@@ -273,14 +269,16 @@ use andy87\yii2\architect\UpdateTable;
  */
 class m240626_210728_update_table__category extends UpdateTable
 {
+    public string $scenario = self::SCENARIO_COLUMN_ADD;
+
     /** @var string Название таблицы */
     protected string $tableName = 'category';
 
     /** @var array Мэппинг внешних ключей */
     protected array $foreignKeyList = [
-        'user'      => 'id',
-        'author_id' => ['user' => 'id'],
-        'parent_id' => ['category' => 'id'],
+        'user'      => 'id', // fk--category-user_id--user-id
+        'author_id' => ['user' => 'id'], // fk--category-author_id--user-id
+        'parent_id' => ['category' => 'id'], // fk--category-parent_id--category-id
     ];
     
     /**
@@ -299,20 +297,21 @@ class m240626_210728_update_table__category extends UpdateTable
 }
 ```
 
-#### Редактирование колонки
-Для редактирования колонки, необходимо переопределить метод `columnsListEdit` и вернуть массив с описанием колонок.
+#### Редактирование таблицы
+Для редактирования колонки, необходимо переопределить метод `columnsListUpdate` и вернуть массив с описанием колонок.
 ```php
 <?php
 
 use andy87\yii2\architect\UpdateTable;
 use app\common\models\sources\Role;
 
-
 /**
  * Class m240626_210729_update_table__user
  */
 class m240626_210729_update_table__user extends UpdateTable
 {
+    public string $scenario = self::SCENARIO_UPDATE;
+
     /** @var string Название таблицы */
     protected string $tableName = 'user';
 
@@ -321,10 +320,22 @@ class m240626_210729_update_table__user extends UpdateTable
      *
      * @return array
      */
-    public function columnsListEdit(): array
+    public function columnsListUpdate(): array
     {
         return [
             'auth_key' => $this->string(64)->notNull()->unique(),
+        ];
+    }
+
+    /**
+     * Список колонок для изменения
+     *
+     * @return array
+     */
+    public function columnsListUpdate(): array
+    {
+        return [
+            'author_id' => $this->integer(4)->notNull()->unique(),
         ];
     }
 }
@@ -343,6 +354,8 @@ use andy87\yii2\architect\UpdateTable;
  */
 class m240626_210725_update_table__product extends UpdateTable
 {
+    public string $scenario = self::SCENARIO_COLUMN_RENAME;
+
     /** @var string Название таблицы */
     protected string $tableName = 'product';
 
@@ -366,6 +379,8 @@ use andy87\yii2\architect\UpdateTable;
  */
 class m240626_210735_update_table__service extends UpdateTable
 {
+    public string $scenario = self::SCENARIO_COLUMN_REMOVE;
+
     /** @var string Название таблицы */
     protected string $tableName = 'service';
 

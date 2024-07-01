@@ -13,7 +13,7 @@ use yii\console\{ ExitCode, Exception };
 abstract class CreateTable extends components\migrations\Architect
 {
     /** @var string Комментарий таблицы */
-    protected string $tableComment = '';
+    public string $tableComment = '';
 
 
 

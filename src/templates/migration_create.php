@@ -19,10 +19,11 @@ use andy87\yii2\architect\CreateTable;
  */
 class <?= $className ?> extends CreateTable
 {
-    protected string $scenario = self::SCENARIO_CREATE;
+    /** @var string Сценарий */
+    public string $scenario = self::SCENARIO_CREATE;
 
     /** @var string Название таблицы */
-    protected string $tableName = '<?= $tableName ?>';
+    public string $tableName = '<?= $tableName ?>';
 
     /** @var array Список внешних ключей */
     public array $foreignKeyList = [

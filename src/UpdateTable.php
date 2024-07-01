@@ -210,26 +210,50 @@ abstract class UpdateTable extends components\migrations\Architect
      */
     private function processUpdate(array $columns, string $command = self::COMMAND_UP ): void
     {
-        if ( count($columns) )
-        {
-            $tableName = $this->prepareTableName();
+        $tableName = $this->prepareTableName();
 
-            if( $command == self::COMMAND_UP)
+        if( $command == self::COMMAND_UP)
+        {
+            if ( count($columns) )
             {
                 $this->prepareColumn(self::ACTION_EDIT, $tableName, $columns );
-
-                $this->prepareForeignKeys($this->foreignKeyList);
-
-            } elseif ( $command == self::COMMAND_DOWN ) {
-
-                $this->prepareForeignKeys( $this->foreignKeyList, self::COMMAND_DOWN );
-
-                if ( count($rollBackColumns = $this->rollBackColumns()) ) {
-                    $this->prepareColumn( self::ACTION_EDIT, $tableName, $rollBackColumns );
-                }
-
-                $this->prepareForeignKeys($this->rollBackKeys());
             }
+
+            if ( count($this->columnListRename) )
+            {
+                $this->processRename($this->columnListRename );
+            }
+
+            if ( count($columnsListAdd = $this->columnsListAdd()) )
+            {
+                $this->prepareColumn(self::ACTION_ADD, $tableName, $columnsListAdd);
+            }
+
+            $this->prepareForeignKeys($this->foreignKeyList);
+
+        } elseif ( $command == self::COMMAND_DOWN ) {
+
+            $this->prepareForeignKeys( $this->foreignKeyList, self::COMMAND_DOWN );
+
+            if ( count($rollBackColumns = $this->rollBackColumns()) ) {
+                $this->prepareColumn( self::ACTION_EDIT, $tableName, $rollBackColumns );
+            }
+
+            if ( count($columnsListAdd = $this->columnsListAdd()) )
+            {
+                $columnsListAdd = array_keys($columnsListAdd);
+
+                foreach ($columnsListAdd as $column ) {
+                    $this->dropColumn($tableName, $column);
+                }
+            }
+
+            if ( count($this->columnListRename) )
+            {
+                $this->processRename($this->columnListRename, self::COMMAND_DOWN );
+            }
+
+            $this->prepareForeignKeys($this->rollBackKeys());
         }
     }
 

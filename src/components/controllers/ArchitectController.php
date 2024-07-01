@@ -5,7 +5,7 @@ namespace andy87\yii2\architect\components\controllers;
 use Yii;
 use yii\helpers\{ FileHelper, BaseConsole };
 use andy87\yii2\architect\components\interfaces\ArchitectInterface;
-use yii\console\{ ExitCode, Exception, controllers\MigrateController };
+use yii\console\{controllers\BaseMigrateController, ExitCode, Exception, controllers\MigrateController};
 
 /**
  * Class MigrateController
@@ -14,14 +14,17 @@ use yii\console\{ ExitCode, Exception, controllers\MigrateController };
  */
 class ArchitectController extends MigrateController implements ArchitectInterface
 {
-    public $promptLabels = [
-        'action' => [
-            self::ACTION_SETUP => 'Setup migrations',
+    public $defaultAction = 'index';
+
+    /** @var array  */
+    public array $promptLabels = [
+        self::PROMPT_ACTION => [
             self::ACTION_CREATE => 'Create migration',
-            self::ACTION_APPLY => 'Apply migrations',
+            self::ACTION_APPLY => 'Up migrations',
             self::ACTION_DOWN => 'Down migrations',
+            self::ACTION_SETUP => 'Run migrations',
         ],
-        'migrate' => [
+        self::PROMPT_MIGRATION => [
             self::SCENARIO_CREATE => 'Create table',
             self::SCENARIO_UPDATE => 'Update column',
             self::SCENARIO_COLUMN_ADD => 'Add column',
@@ -30,8 +33,6 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
         ],
     ];
 
-    public $defaultAction = 'index';
-    public ?string $ns = null;
 
     public string $directoryTemplateMigrations = '@vendor/andy87/yii2-migrate-architect/src/templates/';
 
@@ -58,16 +59,16 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
      */
     public function actionIndex(): int
     {
-        $this->displayPromptVariantList("Select action:", $this->promptLabels['action']);
+        $this->displayPromptVariantList("Select action:", $this->promptLabels[self::PROMPT_ACTION]);
 
-        $action = (int) $this->prompt("\n variant:", ['required' => true]);
+        $action = (int) $this->prompt("\n action : ", ['required' => true]);
 
         match ($action)
         {
-            self::ACTION_SETUP  => $this->processSetup(),
             self::ACTION_CREATE => $this->processCreate(),
             self::ACTION_APPLY  => $this->processApply(),
             self::ACTION_DOWN   => $this->processDown(),
+            self::ACTION_SETUP  => $this->processSetup(),
             self::ACTION_EXIT   => exit("\n EXIT \n"),
             default => exit("\nUnknown action\n")
         };
@@ -91,9 +92,9 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
      */
     public function processCreate(): void
     {
-        $this->displayPromptVariantList("`Create migration`:", $this->promptLabels['migrate']);
+        $this->displayPromptVariantList("`".$this->promptLabels[self::PROMPT_ACTION][self::ACTION_CREATE]."`:", $this->promptLabels[self::PROMPT_MIGRATION]);
 
-        $action = (int) $this->prompt("\naction:", ['required' => true]);
+        $action = (int) $this->prompt("\n migration :", ['required' => true]);
 
         $fileNameTemplate = $this->snippetsMigrationFilename[$action];
 
@@ -210,9 +211,7 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
         if (!preg_match('/^[\w\\\\]+$/', $name)) {
             throw new Exception('The migration name should contain letters, digits, underscore and/or backslash characters only.');
         }
-
-        $className = 'm' . gmdate('ymd_His') . "_$name";
-
+        list($namespace, $className) = $this->generateClassName($name);
         // Abort if name is too long
         $nameLimit = $this->getMigrationNameLimit();
         if ($nameLimit !== null && strlen($className) > $nameLimit) {
@@ -222,14 +221,14 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
         $migrationPath = reset($this->migrationPath);
 
         $file = $migrationPath . DIRECTORY_SEPARATOR . $className . '.php';
-        if ($this->confirm("Create new migration '$file'?")) {
-            $migrateParams = array_merge([
+        if ($this->confirm("Create new migration '$file'?"))
+        {
+            $content = $this->generateMigrationSourceCode(array_merge([
                 'name' => $tableName,
                 'className' => $className,
-                'namespace' => $this->ns,
+                'namespace' => $namespace,
                 'tableName' => $tableName
-            ], $params);
-            $content = $this->generateMigrationSourceCode($migrateParams);
+            ], $params));
             FileHelper::createDirectory($migrationPath);
             if (file_put_contents($file, $content, LOCK_EX) === false) {
                 $this->stdout("Failed to create new migration.\n", BaseConsole::FG_RED);
@@ -243,5 +242,34 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
         }
 
         return ExitCode::OK;
+    }
+
+    /**
+     * @param $name
+     *
+     * @return array
+     *
+     * @see BaseMigrateController::generateClassName()
+     */
+    private function generateClassName($name): array
+    {
+        $namespace = null;
+        $name = trim($name, '\\');
+
+        if (str_contains($name, '\\')) {
+            $namespace = substr($name, 0, strrpos($name, '\\'));
+            $name = substr($name, strrpos($name, '\\') + 1);
+        } else {
+            if ($this->migrationPath === null) {
+                $migrationNamespaces = $this->migrationNamespaces;
+                $namespace = array_shift($migrationNamespaces);
+            }
+        }
+
+        $class = ( $namespace === null )
+            ? ('m' . gmdate('ymd_His') . '_' . $name)
+            : ('M' . gmdate('ymdHis') . ucfirst($name));
+
+        return [$namespace, $class];
     }
 }

@@ -7,6 +7,7 @@
 
   "version": "0.0.1",
   "minimum-stability": "dev",
+  "prefer-stable": true,
 
   "authors": [
     {
@@ -17,7 +18,7 @@
 
   "require": {
     "php": ">=8.0",
-    "yiisoft/yii2": "*"
+    "yiisoft/yii2": "~2.0.43"
   },
 
   "autoload": {
@@ -25,10 +26,20 @@
       "andy87\\yii2\\architect\\": "src/"
     }
   },
-
   "config": {
     "allow-plugins": {
-      "yiisoft/yii2-composer": true
+      "yiisoft/yii2-composer" : true
+    },
+    "process-timeout": 1800,
+    "fxp-asset": {
+      "enabled": false
     }
-  }
+  },
+
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://asset-packagist.org"
+    }
+  ]
 }
