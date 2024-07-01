@@ -2,6 +2,7 @@
 
 namespace andy87\yii2\architect\components\migrations;
 
+use andy87\yii2\architect\components\interfaces\ArchitectInterface;
 use yii\db\Migration;
 use yii\console\{ ExitCode, Exception };
 use andy87\yii2\architect\components\db\MySql;
@@ -11,7 +12,7 @@ use andy87\yii2\architect\components\db\MySql;
  * 
  * @package andy87\yii2\architect\components\migrations
  */
-abstract class Architect extends Migration
+abstract class Architect extends Migration implements ArchitectInterface
 {
     /** @var string Настройка типа для dateTime колонок*/
     protected const DATETIME = self::DATETIME_DATETIME;
@@ -40,6 +41,8 @@ abstract class Architect extends Migration
     protected const COMMAND_DOWN = 'down';
 
 
+    /** @var int Сценарий */
+    protected int $scenario;
 
     /** @var string Имя таблицы */
     protected string $tableName;
@@ -71,23 +74,29 @@ abstract class Architect extends Migration
 
 
     /**
+     * Применение миграций
+     *
      * @return int
+     *
      * @throws Exception
      */
     public function safeUp(): int
     {
-        $this->prepareForeignKeys(self::COMMAND_UP, $this->foreignKeyList );
+        $this->prepareForeignKeys( $this->foreignKeyList );
 
         return ExitCode::OK;
     }
 
     /**
+     * Откат миграций
+     *
      * @return int
+     *
      * @throws Exception
      */
     public function safeDown(): int
     {
-        $this->prepareForeignKeys(self::COMMAND_DOWN, $this->foreignKeyList );
+        $this->prepareForeignKeys($this->foreignKeyList, self::COMMAND_DOWN );
 
         return ExitCode::OK;
     }
@@ -100,7 +109,7 @@ abstract class Architect extends Migration
      *
      * @throws Exception
      */
-    protected function prepareForeignKeys( string $command, array $keys ): void
+    protected function prepareForeignKeys( array $keys, string $command = self::COMMAND_UP ): void
     {
         if ( count($keys) )
         {
@@ -126,16 +135,44 @@ abstract class Architect extends Migration
      */
     protected function constructForeignKeys( array $keys ): void
     {
-        $tableName = $this->getTableName();
-        
-        foreach ( $keys as $TableNameOrColumnName => $columnOrParams )
+        if ( count($keys) )
         {
-            [$column, $refTableName, $refColumnName] = $this->getForeignData($TableNameOrColumnName, $columnOrParams);
+            $tableName = $this->prepareTableName();
 
-            $this->addForeignKey(
-                $this->generateForeignKeyName($tableName, $column, $refTableName, $refColumnName ),
-                $tableName, $column, $refTableName, $refColumnName
-            );
+            foreach ( $keys as $TableNameOrColumnName => $columnOrParams )
+            {
+                [$column, $refTableName, $refColumnName] = $this->getForeignData($TableNameOrColumnName, $columnOrParams);
+
+                $this->addForeignKey(
+                    $this->generateForeignKeyName($tableName, $column, $refTableName, $refColumnName ),
+                    $tableName, $column, $refTableName, $refColumnName
+                );
+            }
+        }
+    }
+
+    /**
+     * @param array $keys
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    protected function dropForeignKeys( array $keys ): void
+    {
+        if ( count($keys) )
+        {
+            $tableName = $this->prepareTableName();
+
+            foreach ( $keys as $TableNameOrColumnName => $columnOrParams )
+            {
+                [$column, $refTableName, $refColumnName] = $this->getForeignData($TableNameOrColumnName, $columnOrParams);
+
+                $this->dropForeignKey(
+                    $this->generateForeignKeyName($tableName, $column, $refTableName, $refColumnName ),
+                    $tableName
+                );
+            }
         }
     }
 
@@ -149,29 +186,7 @@ abstract class Architect extends Migration
      */
     protected function generateForeignKeyName( string $tableName, string $column, string $refTableName, string $refColumnName ): string
     {
-        return "fk--$tableName-$column--$refTableName-$refColumnName";
-    }
-
-    /**
-     * @param array $keys
-     *
-     * @return void
-     *
-     * @throws Exception
-     */
-    protected function dropForeignKeys( array $keys ): void
-    {
-        $tableName = $this->getTableName();
-        
-        foreach ( $keys as $TableNameOrColumnName => $columnOrParams )
-        {
-            [$column, $refTableName, $refColumnName] = $this->getForeignData($TableNameOrColumnName, $columnOrParams);
-            
-            $this->dropForeignKey(
-                $this->generateForeignKeyName($tableName, $column, $refTableName, $refColumnName ),
-                $tableName
-            );
-        }
+        return sprintf("fk--%s-%s--%s-%s", $tableName, $column, $refTableName, $refColumnName);
     }
 
     /**
@@ -221,13 +236,16 @@ abstract class Architect extends Migration
      */
     protected function getTableOptions(): ?string
     {
-        return ($this->db->driverName === MySql::DRIVER ) ? MySql::getOptions() : null;
+        return match ($this->db->driverName) {
+            MySql::DRIVER => MySql::getOptions(),
+            default => null,
+        };
     }
 
     /**
      * @return string
      */
-    protected function getTableName(): string
+    protected function prepareTableName(): string
     {
         $tableName = $this->db->quoteSql($this->tableName);
 

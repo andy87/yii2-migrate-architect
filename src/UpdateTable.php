@@ -12,11 +12,12 @@ use yii\console\ExitCode;
  */
 abstract class UpdateTable extends components\migrations\Architect
 {
-    /** @var array Действие редактирование колонки */
-    private const ACTION_EDIT = 0;
-
     /** @var array Действие добавление колонки */
     private const ACTION_ADD = 1;
+
+    /** @var array Действие редактирование колонки */
+    private const ACTION_EDIT = 2;
+
 
 
     /** @var array Список колонок для удаления */
@@ -28,14 +29,18 @@ abstract class UpdateTable extends components\migrations\Architect
 
 
     /**
+     * Список колонок пользователя для редактирования
+     *
      * @return array
      */
-    public function columnsListEdit(): array
+    public function columnsListUpdate(): array
     {
         return [];
     }
 
     /**
+     * Список колонок пользователя для добавления
+     *
      * @return array
      */
     public function columnsListAdd(): array
@@ -45,6 +50,8 @@ abstract class UpdateTable extends components\migrations\Architect
 
 
     /**
+     * Список колонок для отката внешних ключей
+     *
      * @return array
      */
     public function rollBackKeys(): array
@@ -53,6 +60,8 @@ abstract class UpdateTable extends components\migrations\Architect
     }
 
     /**
+     * Список колонок для отката
+     *
      * @return array
      */
     public function rollBackColumns(): array
@@ -61,119 +70,176 @@ abstract class UpdateTable extends components\migrations\Architect
     }
 
     /**
+     * Применение миграций
+     *
      * @return int
+     *
      * @throws Exception
      */
     final public function safeUp(): int
     {
-        if ( count($this->columnListRemove) )
+        switch ($this->scenario)
         {
-            $this->prepareForeignKeys(self::COMMAND_DOWN, $this->foreignKeyList );
+            case self::SCENARIO_COLUMN_REMOVE:
+                $this->processRemove( $this->columnListRemove );
+                break;
 
-            $this->processRemove( $this->columnListRemove );
+            case self::SCENARIO_COLUMN_RENAME:
+                $this->processRename( $this->columnListRename);
+                break;
+
+            case self::SCENARIO_UPDATE:
+                $this->processUpdate( $this->columnsListUpdate() );
+                break;
+
+            case self::SCENARIO_COLUMN_ADD:
+                $this->processAdd( $this->columnsListAdd() );
+                break;
         }
 
-        $this->processRename($this->columnListRename);
-
-        $this->processEdit ($this->columnsListEdit() );
-
-        $this->processAdd( self::COMMAND_UP, $this->columnsListAdd() );
-
-        return parent::safeUp();
+        return ExitCode::OK;
     }
 
     /**
+     * Откат миграций
+     *
      * @return int
      *
      * @throws Exception
      */
     final public function safeDown(): int
     {
-        if ( parent::safeDown() == ExitCode::OK )
+        switch ($this->scenario)
         {
-            $this->processRename($this->columnListRename, self::COMMAND_DOWN );
+            case self::SCENARIO_COLUMN_REMOVE:
+                $this->processRemove( $this->columnListRemove, self::COMMAND_DOWN );
+                break;
 
-            if ( count($addColumnKeys = $this->columnsListAdd()) )
-            {
-                $addColumnKeys = array_keys($addColumnKeys);
+            case self::SCENARIO_COLUMN_RENAME:
+                $this->processRename( $this->columnListRename, self::COMMAND_DOWN);
+                break;
 
-                $this->processRemove( $addColumnKeys );
-            }
+            case self::SCENARIO_UPDATE:
+                $this->processUpdate( $this->columnsListUpdate(), self::COMMAND_DOWN );
+                break;
 
-            if ( count($rollBackColumns = $this->rollBackColumns()) ) {
-                $this->processAdd( self::COMMAND_DOWN, $rollBackColumns );
-            }
-
-            if ( count($rollBackKeys = $this->rollBackKeys()) ) {
-                $this->prepareForeignKeys(self::COMMAND_UP, $rollBackKeys );
-            }
-
-            return ExitCode::OK;
+            case self::SCENARIO_COLUMN_ADD:
+                $this->processAdd( $this->columnsListAdd(), self::COMMAND_DOWN);
+                break;
         }
 
-        return ExitCode::DATAERR;
+        return ExitCode::OK;
     }
 
     /**
+     * Удаление колонок.
+     *
+     * Задаётся для применения миграции:
+     *  - массив `columnListRemove` - какие колонки надо удалить
+     *  - массив `foreignKeyList` - какие ключи удалить/откатить
+     *
+     * Задаётся для отката миграции:
+     *  - метод `rollBackColumns` - удалённые колонки и их типы
+     *
      * @param array $columns
+     * @param string $command
      *
      * @return void
      *
      * @throws \yii\console\Exception
      */
-    private function processRemove( array $columns ): void
+    private function processRemove( array $columns, string $command = self::COMMAND_UP ): void
     {
         if ( count($columns) )
         {
-            $tableName = $this->getTableName();
+            $tableName = $this->prepareTableName();
 
-            foreach ($columns as $column => $columnOrParams )
+            if( $command == self::COMMAND_UP)
             {
-                if ( is_string($columnOrParams) || is_array($columnOrParams) )
-                {
-                    [$column, $refTableName, $refColumnName] = $this->getForeignData($tableName, $columnOrParams);
+                $this->prepareForeignKeys($this->foreignKeyList, self::COMMAND_DOWN);
 
-                    $foreignKeyName = $this->generateForeignKeyName($tableName, $column, $refTableName, $refColumnName);
-
-                    $this->dropForeignKey($foreignKeyName, $tableName);
+                foreach ($columns as $column => $columnOrParams ) {
+                    $this->dropColumn($tableName, $column);
                 }
 
-                $this->dropColumn($tableName, $column);
+            } elseif ( $command == self::COMMAND_DOWN ) {
+
+                if ( count($rollBackColumns = $this->rollBackColumns()) )
+                {
+                    $this->processAdd( $rollBackColumns );
+
+                    $this->prepareForeignKeys($this->foreignKeyList);
+                }
             }
         }
     }
 
     /**
+     * Переименование колонок.
+     *
+     * Задаётся для применения миграции:
+     * - массив `columnListRename` - какие колонки надо переименовать
+     *      ['старое_название' => 'новое_название']
+     *
      * @param string $command
      * @param array $columns
      *
      * @return void
      */
-    private function processRename(array $columns,  string $command = self::COMMAND_UP ): void
+    private function processRename(array $columns, string $command = self::COMMAND_UP ): void
     {
         $columns = ($command == self::COMMAND_UP ) ? $columns : array_flip($columns);
 
-        $tableName = $this->getTableName();
-
         foreach ( $columns as $oldName => $newName )
         {
-            $this->renameColumn($tableName, $oldName, $newName);
+            $this->renameColumn($this->tableName, $oldName, $newName);
         }
     }
 
     /**
+     * Редактирование колонок.
+     *
+     * Задаётся для применения миграции:
+     *  - метод `columnsListUpdate` - какие колонки надо изменить
+     *
      * @param array $columns
+     * @param string $command
      *
      * @return void
+     * @throws \yii\console\Exception
      */
-    private function processEdit(array $columns): void
+    private function processUpdate(array $columns, string $command = self::COMMAND_UP ): void
     {
-        $tableName = $this->getTableName();
+        if ( count($columns) )
+        {
+            $tableName = $this->prepareTableName();
 
-        $this->processUpdate(self::ACTION_EDIT, $tableName, $columns );
+            if( $command == self::COMMAND_UP)
+            {
+                $this->prepareColumn(self::ACTION_EDIT, $tableName, $columns );
+
+                $this->prepareForeignKeys($this->foreignKeyList);
+
+            } elseif ( $command == self::COMMAND_DOWN ) {
+
+                $this->prepareForeignKeys( $this->foreignKeyList, self::COMMAND_DOWN );
+
+                if ( count($rollBackColumns = $this->rollBackColumns()) ) {
+                    $this->prepareColumn( self::ACTION_EDIT, $tableName, $rollBackColumns );
+                }
+
+                $this->prepareForeignKeys($this->rollBackKeys());
+            }
+        }
     }
 
     /**
+     * Добавление колонок.
+     *
+     * Задаётся для применения миграции:
+     *  - метод `columnsListAdd` - какие колонки надо добавить
+     *  - массив `foreignKeyList` - какие ключи добавить
+     *
      * @param string $command
      * @param array $columns
      *
@@ -181,27 +247,25 @@ abstract class UpdateTable extends components\migrations\Architect
      *
      * @throws \yii\console\Exception
      */
-    private function processAdd( string $command, array $columns ): void
+    private function processAdd( array $columns, string $command = self::COMMAND_UP ): void
     {
         if ( count($columns) )
         {
-            $tableName = $this->getTableName();
+            $tableName = $this->prepareTableName();
 
-            if ($command === self::COMMAND_UP )
+            if ( $command == self::COMMAND_UP )
             {
-                foreach ($columns as $column => $params )
-                {
-                    $this->addColumn($tableName, $column, $params);
+                $this->prepareColumn(self::ACTION_ADD, $tableName, $columns );
+
+                $this->prepareForeignKeys($this->foreignKeyList);
+
+            } elseif ( $command == self::COMMAND_DOWN ) {
+
+                $this->prepareForeignKeys( $this->foreignKeyList, self::COMMAND_DOWN );
+
+                foreach ($columns as $column => $columnOrParams ) {
+                    $this->dropColumn($tableName, $column);
                 }
-            } elseif ($command === self::COMMAND_DOWN) {
-
-                if ( count($this->foreignKeyList) ) {
-                    $this->prepareForeignKeys(self::COMMAND_DOWN, $this->foreignKeyList);
-                }
-
-                $columns = array_keys($columns);
-
-                $this->processRemove($columns);
             }
         }
     }
@@ -213,7 +277,7 @@ abstract class UpdateTable extends components\migrations\Architect
      *
      * @return void
      */
-    private function processUpdate( int $action, string $tableName, array $columns ): void
+    private function prepareColumn(int $action, string $tableName, array $columns ): void
     {
         if ( count($columns) )
         {

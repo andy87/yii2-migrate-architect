@@ -21,6 +21,8 @@ use andy87\yii2\architect\UpdateTable;
  */
 class <?= $className ?> extends UpdateTable
 {
+    protected string $scenario = self::SCENARIO_COLUMN_REMOVE;
+
     /** @var string Название таблицы */
     protected string $tableName = '<?= $tableName ?>';
 

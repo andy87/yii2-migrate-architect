@@ -3,13 +3,9 @@
 
 <p align="center"><img src="assets/logo/yii2-migrate-architectLogo_256.png" style="width:256px; height: auto" alt="yii2-migrate-architect php curl facade"/></p>
 
-Yii2 migrate architect - библиотека упрощающая написание кода миграций в Yii2
+Yii2 migrate architect - библиотека для фреймворка Yii2 упрощающая написание кода миграций. 
 
-Цель: сделать простой и лёгкий в настройке компонента и запроса пакет.
-
-P.S. я знаю про существование таких библиотек как: [Guzzle](https://github.com/guzzle/guzzle), [Client](https://github.com/yiisoft/yii2-httpclient) _(в моём любимом Yii2)_, но хотелось попробовать создать свою реализацию.  
-Без "лишних" данных, вызовов и настроек, nullWarningStyle - только то, что нужно: сухо, лаконично, минималистично.  
-_Разумеется, это не конкурент, а просто попытка создать что-то своё_
+Цель: сделать простой и быстрый инструмент добавления миграций.
 
 ### Содержание:
 
@@ -21,7 +17,6 @@ ___
 <h2 align="center"> <span id="yii2-migrate-architect-setup"></span>
     Установка
 </h2>
-
 
 <h3>Требования</h3> <span id="yii2-migrate-architect-setup-require"></span>
 
@@ -78,6 +73,7 @@ return [
 - **directoryTemplateMigrations** _путь к шаблонам миграций_
 - **migrateTemplateMapping** _маппинг шаблонов миграций_
 - **snippetsMigrationFilename** _шаблоны для генерации части имени файла миграпции_
+
 ```php
 use andy87\yii2\architect\components\controllers\ArchitectController;
 
@@ -91,12 +87,14 @@ return [
             'ns' => 'name/space',
             'directoryTemplateMigrations' => '@app/path/to/migrations/template/',
             'migrateTemplateMapping' => [
-                ArchitectController::MIGRATE_ADD => 'create_table_template',
-                ArchitectController::MIGRATE_UPDATE => 'update_table_template',
+                ArchitectController::SCENARIO_COLUMN_ADD => 'create_table_template',
+                ArchitectController::SCENARIO_UPDATE => 'update_table_template',
+                //,,,
             ],
             'snippetsMigrationFilename' => [
-                ArchitectController::MIGRATE_ADD => 'create_table_%s',
-                ArchitectController::MIGRATE_UPDATE => 'update_table_%s',
+                ArchitectController::SCENARIO_COLUMN_ADD => 'create_table_%s',
+                ArchitectController::SCENARIO_UPDATE => 'update_table_%s',
+                //,,,
             ]
         ],
         // ...
@@ -148,13 +146,13 @@ New migration created successfully.
 
 ```
 
-P.S. миграция не полностью пишется за разработчика, всё же руками что-то добавить придётся.
+P.S. все rollBack функции и миграции add/update не полностью пишется за разработчика.
 ___
 
 ## Простые примеры миграций
 
 ### CreateTable.
-columns
+
 #### Создание таблицы
 Колонки: `id`, `created_at`, `updated_at` создадутся автоматически
 ```php
@@ -167,9 +165,22 @@ use andy87\yii2\architect\CreateTable;
  */
 class m240626_210742_create_table__role extends CreateTable
 {
+    protected string $scenario = self::SCENARIO_CREATE;
+
     /** @var string Название таблицы */
     protected string $tableName = '{{%role}}';
     
+    /** 
+     * @var array Список для генерации внешних ключей 
+     * для примера добавлены два внешних ключа:
+     * - fk--role-module_id--module-id
+     * - fk--role-sub_module_id--module-id  
+     */
+    protected array $foreignKeyList = [
+        'module' => 'id', // 
+        'sub_module_id' => ['module' => 'id'],
+    ];
+
     /**
      * @return array
      */
@@ -180,12 +191,14 @@ class m240626_210742_create_table__role extends CreateTable
             'key' => $this->string(32)->notNull()->unique(),
             'name' => $this->string(64)->notNull()->unique(),
             'priority' => $this->integer(4)->defaultValue(1),
+            'module_id' => $this->integer(4)->notNull(),
+            'sub_module_id' => $this->integer(4)->notNull(),
         ];
     }
 }
 ```
 Отмена создания колонок, происходит через назначение значения `false` или `null` для колонки.
-для примера: `id`, `created_at`, `updated_at` не будут созданы
+Для примера: `id`, `updated_at` не будут созданы
 ```php
 <?php
 
@@ -196,6 +209,8 @@ use andy87\yii2\architect\CreateTable;
  */
 class m240626_210741_create_table__log extends CreateTable
 {
+    protected string $scenario = self::SCENARIO_CREATE;
+
     /** @var string Название таблицы */
     protected string $tableName = 'log';
     
@@ -206,11 +221,7 @@ class m240626_210741_create_table__log extends CreateTable
     {
         return  [
             self::COLUMN_ID => false,
-            'status' => $this->smallInteger()->notNull()->defaultValue(10),
-            'key' => $this->string(32)->notNull()->unique(),
-            'name' => $this->string(64)->notNull()->unique(),
-            'priority' => $this->integer(4)->defaultValue(1),
-            self::COLUMN_CREATED_AT => false,
+            'text' => $this->string(32)->notNull()->unique(),
             self::COLUMN_UPDATED_AT => null,
         ];
     }

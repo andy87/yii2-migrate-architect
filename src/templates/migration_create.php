@@ -19,6 +19,8 @@ use andy87\yii2\architect\CreateTable;
  */
 class <?= $className ?> extends CreateTable
 {
+    protected string $scenario = self::SCENARIO_CREATE;
+
     /** @var string Название таблицы */
     protected string $tableName = '<?= $tableName ?>';
 

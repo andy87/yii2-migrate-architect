@@ -19,6 +19,8 @@ use andy87\yii2\architect\UpdateTable;
  */
 class <?= $className ?> extends UpdateTable
 {
+    protected string $scenario = self::SCENARIO_UPDATE;
+
     /** @var string Название таблицы */
     protected string $tableName = '<?= $tableName ?>';
 
@@ -33,17 +35,6 @@ class <?= $className ?> extends UpdateTable
         // 'column_id' => ['table' => 'column'],
     ];
 
-
-    /**
-     * @return array
-     */
-    public function columnsListAdd(): array
-    {
-        return [
-            //'column' => $this->string(64)->notNull()->unique(),
-            //'column' => 'VARCHAR(255) NOT NULL AFTER `column`',
-        ];
-    }
 
     /**
      * @return array

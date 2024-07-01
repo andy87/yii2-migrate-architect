@@ -40,13 +40,15 @@ abstract class CreateTable extends components\migrations\Architect
     }
 
     /**
-     * Получение списка колонок
+     * Получение списка колонок пользователя
      *
      * @return array
      */
     abstract public function columns(): array;
 
     /**
+     * Добавление в список колонок стандартные поля: ID, created_at, updated_at
+     *
      * @param array $columns
      *
      * @return array
@@ -81,34 +83,35 @@ abstract class CreateTable extends components\migrations\Architect
     }
 
     /**
+     * Получение опций для создаваемых колонок: created_at, updated_at
+     *
      * @param string $comment
      *
      * @return ColumnSchemaBuilder
      */
     protected function getSchemaDateTime(string $comment): ColumnSchemaBuilder
     {
-        $type = null;
-
-        $expression = [
-            self::DATETIME_TIMESTAMP => 'CURRENT_TIMESTAMP',
-            self::DATETIME_DATETIME => 'NOW()',
-        ];
-        $expression = $expression[self::DATETIME];
-
         $type = match (self::DATETIME)
         {
             self::DATETIME_TIMESTAMP => $this->timestamp(),
             self::DATETIME_DATETIME => $this->dateTime(),
         };
-        
+
+        $expression = match(self::DATETIME)
+        {
+            self::DATETIME_TIMESTAMP => 'CURRENT_TIMESTAMP',
+            self::DATETIME_DATETIME => 'NOW()',
+        };
+
         return $type
             ->defaultExpression($expression)
             ->append("ON UPDATE $expression")
             ->comment($comment);
     }
 
-
     /**
+     * Откат миграций
+     *
      * @return int
      *
      * @throws Exception

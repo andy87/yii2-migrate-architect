@@ -22,11 +22,11 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
             self::ACTION_DOWN => 'Down migrations',
         ],
         'migrate' => [
-            self::MIGRATE_CREATE => 'Create table',
-            self::MIGRATE_UPDATE => 'Update column',
-            self::MIGRATE_ADD => 'Add column',
-            self::MIGRATE_RENAME => 'Rename column',
-            self::MIGRATE_REMOVE => 'Remove column',
+            self::SCENARIO_CREATE => 'Create table',
+            self::SCENARIO_UPDATE => 'Update column',
+            self::SCENARIO_COLUMN_ADD => 'Add column',
+            self::SCENARIO_COLUMN_RENAME => 'Rename column',
+            self::SCENARIO_COLUMN_REMOVE => 'Remove column',
         ],
     ];
 
@@ -36,19 +36,19 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
     public string $directoryTemplateMigrations = '@vendor/andy87/yii2-migrate-architect/src/templates/';
 
     public array $migrateTemplateMapping = [
-        self::MIGRATE_CREATE => 'migration_create',
-        self::MIGRATE_UPDATE => 'migration_update',
-        self::MIGRATE_ADD => 'migration_update_add',
-        self::MIGRATE_RENAME => 'migration_update_rename',
-        self::MIGRATE_REMOVE => 'migration_update_remove',
+        self::SCENARIO_CREATE => 'migration_create',
+        self::SCENARIO_UPDATE => 'migration_update',
+        self::SCENARIO_COLUMN_ADD => 'migration_update_add',
+        self::SCENARIO_COLUMN_RENAME => 'migration_update_rename',
+        self::SCENARIO_COLUMN_REMOVE => 'migration_update_remove',
     ];
 
     public array $snippetsMigrationFilename = [
-        self::MIGRATE_CREATE  => 'create_table__%s',
-        self::MIGRATE_UPDATE  => 'update_table__%s',
-        self::MIGRATE_ADD     => 'columns_add__%s',
-        self::MIGRATE_RENAME  => 'columns_rename__%s',
-        self::MIGRATE_REMOVE  => 'columns_remove__%s',
+        self::SCENARIO_CREATE  => 'create_table__%s',
+        self::SCENARIO_UPDATE  => 'update_table__%s',
+        self::SCENARIO_COLUMN_ADD     => 'columns_add__%s',
+        self::SCENARIO_COLUMN_RENAME  => 'columns_rename__%s',
+        self::SCENARIO_COLUMN_REMOVE  => 'columns_remove__%s',
     ];
 
     /**
@@ -108,8 +108,8 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
 
         $params = match($action)
         {
-            self::MIGRATE_RENAME => ['columnListRename' => ''],
-            self::MIGRATE_REMOVE => ['columnListRemove' => ''],
+            self::SCENARIO_COLUMN_RENAME => ['columnListRename' => ''],
+            self::SCENARIO_COLUMN_REMOVE => ['columnListRemove' => ''],
             default => []
         };
 
@@ -123,13 +123,13 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
             {
                 switch ($action)
                 {
-                    case self::MIGRATE_RENAME:
+                    case self::SCENARIO_COLUMN_RENAME:
                         $columnName = $this->prompt("\nOld column name:", ['required' => true]);
                         $newColumnName = $this->prompt("New column name:", ['required' => true]);
                         $params['columnListRename'] .= "\n        '$columnName' => '$newColumnName',";
                         break;
 
-                    case self::MIGRATE_REMOVE:
+                    case self::SCENARIO_COLUMN_REMOVE:
                         $columnName = $this->prompt("\nRemove column name:", ['required' => true]);
                         $params['columnListRemove'] .= "\n        '$columnName' => null,";
                         break;
