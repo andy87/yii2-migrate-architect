@@ -91,7 +91,7 @@ abstract class CreateTable extends components\migrations\Architect
      */
     protected function getSchemaDateTime(string $comment): ColumnSchemaBuilder
     {
-        $type = match (self::DATETIME)
+        $type = match (static::DATETIME)
         {
             self::DATETIME_TIMESTAMP => $this->timestamp(),
             self::DATETIME_DATETIME => $this->dateTime(),
