@@ -15,7 +15,7 @@ use andy87\yii2\architect\components\db\MySql;
 abstract class Architect extends Migration implements ArchitectInterface
 {
     /** @var string Настройка типа для dateTime колонок*/
-    protected const DATETIME = self::DATETIME_DATETIME;
+    protected const DATETIME = self::DATETIME_TIMESTAMP;
 
 
     /** @var string Флаг использования `Timestamp` схемы */
