@@ -4,6 +4,7 @@ namespace andy87\yii2\architect;
 
 use yii\db\ColumnSchemaBuilder;
 use yii\console\{ ExitCode, Exception };
+use yii\db\Expression;
 
 /**
  * Class CreateTable
@@ -70,7 +71,7 @@ abstract class CreateTable extends components\migrations\Architect
 
                     case self::COLUMN_CREATED_AT:
                     case self::COLUMN_UPDATED_AT:
-                    $columns[$key] = $this->getSchemaDateTime($label);
+                    $columns[$key] = $this->getSchemaDateTime($key, $label);
                         break;
                 }
             } elseif (!$columns[$key]) {
@@ -89,25 +90,37 @@ abstract class CreateTable extends components\migrations\Architect
      *
      * @return ColumnSchemaBuilder
      */
-    protected function getSchemaDateTime(string $comment): ColumnSchemaBuilder
+    protected function getSchemaDateTime(string $key, string $comment): ColumnSchemaBuilder
     {
-        $type = match (static::DATETIME)
+        $columnConstructor = match (static::DATETIME)
         {
-            self::DATETIME_TIMESTAMP => $this->timestamp(),
+            self::DATETIME_TIMESTAMP => $this->integer(),
             self::DATETIME_DATETIME => $this->dateTime(),
         };
 
-        $expression = match(static::DATETIME)
+        if ( static::DATETIME == self::DATETIME_DATETIME )
         {
-            self::DATETIME_TIMESTAMP => 'CURRENT_TIMESTAMP',
-            self::DATETIME_DATETIME => 'NOW()',
-        };
+            $dateTiemCmd = 'NOW()';
 
-        return $type
-            ->null()
-            ->defaultExpression($expression)
-            ->append("ON UPDATE $expression")
-            ->comment($comment);
+            if ($key === self::COLUMN_UPDATED_AT) {
+
+                $columnConstructor
+                    ->null()
+                    ->append(
+                        new Expression(
+                            "ON UPDATE $dateTiemCmd"
+                        )
+                    );
+
+            } elseif ( $key === self::COLUMN_CREATED_AT ) {
+
+                $columnConstructor
+                    ->notNull()
+                    ->defaultExpression($dateTiemCmd);
+            }
+        }
+
+        return $columnConstructor->comment($comment);
     }
 
     /**
