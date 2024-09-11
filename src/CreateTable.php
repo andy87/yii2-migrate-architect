@@ -91,19 +91,20 @@ abstract class CreateTable extends components\migrations\Architect
      */
     protected function getSchemaDateTime(string $comment): ColumnSchemaBuilder
     {
-        $type = match (self::DATETIME)
+        $type = match (static::DATETIME)
         {
             self::DATETIME_TIMESTAMP => $this->timestamp(),
             self::DATETIME_DATETIME => $this->dateTime(),
         };
 
-        $expression = match(self::DATETIME)
+        $expression = match(static::DATETIME)
         {
             self::DATETIME_TIMESTAMP => 'CURRENT_TIMESTAMP',
             self::DATETIME_DATETIME => 'NOW()',
         };
 
         return $type
+            ->null()
             ->defaultExpression($expression)
             ->append("ON UPDATE $expression")
             ->comment($comment);
