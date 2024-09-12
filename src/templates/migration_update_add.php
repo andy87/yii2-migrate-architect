@@ -19,8 +19,8 @@ use andy87\yii2\architect\UpdateTable;
  */
 class <?= $className ?> extends UpdateTable
 {
-    /** @var string Сценарий */
-    public string $scenario = self::SCENARIO_COLUMN_ADD;
+    /** @var int Сценарий */
+    public int $scenario = self::SCENARIO_COLUMN_ADD;
 
     /** @var string Название таблицы */
     public string $tableName = '<?= $tableName ?>';
