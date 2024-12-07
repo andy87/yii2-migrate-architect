@@ -71,6 +71,7 @@ return [
 - **directoryTemplateMigrations** _путь к шаблонам миграций_
 - **migrateTemplateMapping** _маппинг шаблонов миграций_
 - **snippetsMigrationFilename** _шаблоны имён файлов миграции_
+- **migrationPath** _(массив)путь к директории в которую будет сгенерирована миграция_
 
 ```php
 use andy87\yii2\architect\components\controllers\ArchitectController;
@@ -92,7 +93,8 @@ return [
                 ArchitectController::SCENARIO_COLUMN_ADD => 'create_table__%s',
                 ArchitectController::SCENARIO_UPDATE => 'update_table__%s',
                 //,,,
-            ]
+            ],
+            'migrationPath' => ['@console/migration']
         ],
         // ...
     ],
