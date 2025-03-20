@@ -27,6 +27,8 @@ abstract class CreateTable extends components\migrations\Architect
      */
     final public function safeUp(): int
     {
+        $this->beforeUp();
+        
         $columns = $this->prepareColumns(
             $this->columns()
         );
@@ -36,6 +38,8 @@ abstract class CreateTable extends components\migrations\Architect
         if ( strlen($this->tableComment) > 0 ) {
             $this->addCommentOnTable($this->tableName, $this->tableComment);
         }
+
+        $this->afterUp();
 
         return parent::safeUp();
     }
@@ -132,10 +136,14 @@ abstract class CreateTable extends components\migrations\Architect
      */
     final public function safeDown(): int
     {
+        $this->beforeDown();
+        
         if (parent::safeDown() === ExitCode::OK)
         {
             $this->dropTable($this->tableName);
 
+            $this->afterDown();
+            
             return ExitCode::OK;
         }
 

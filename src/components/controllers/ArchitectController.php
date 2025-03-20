@@ -36,6 +36,8 @@ class ArchitectController extends MigrateController implements ArchitectInterfac
 
     public string $directoryTemplateMigrations = '@vendor/andy87/yii2-migrate-architect/src/templates/';
 
+    public string $directoryMigrations = '@app/migration/';
+
     public array $migrateTemplateMapping = [
         self::SCENARIO_CREATE => 'migration_create',
         self::SCENARIO_UPDATE => 'migration_update',

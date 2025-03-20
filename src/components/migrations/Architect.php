@@ -251,4 +251,36 @@ abstract class Architect extends Migration implements ArchitectInterface
 
         return trim($tableName, '`');
     }
+
+    /**
+     * @return void
+     */
+    protected function beforeUp(): void
+    {
+        // override
+    }
+
+    /**
+     * @return void
+     */
+    protected function afterUp(): void
+    {
+        // override
+    }
+
+    /**
+     * @return void
+     */
+    protected function beforeDown(): void
+    {
+        // override
+    }
+
+    /**
+     * @return void
+     */
+    protected function afterDown(): void
+    {
+        // override
+    }
 }

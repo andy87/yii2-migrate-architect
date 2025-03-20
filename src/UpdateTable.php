@@ -78,6 +78,8 @@ abstract class UpdateTable extends components\migrations\Architect
      */
     final public function safeUp(): int
     {
+        $this->beforeUp();
+        
         switch ($this->scenario)
         {
             case self::SCENARIO_COLUMN_REMOVE:
@@ -96,6 +98,8 @@ abstract class UpdateTable extends components\migrations\Architect
                 $this->processAdd( $this->columnsListAdd() );
                 break;
         }
+        
+        $this->afterUp();
 
         return ExitCode::OK;
     }
@@ -109,6 +113,8 @@ abstract class UpdateTable extends components\migrations\Architect
      */
     final public function safeDown(): int
     {
+        $this->beforeDown();
+        
         switch ($this->scenario)
         {
             case self::SCENARIO_COLUMN_REMOVE:
@@ -128,6 +134,8 @@ abstract class UpdateTable extends components\migrations\Architect
                 break;
         }
 
+        $this->afterDown();
+        
         return ExitCode::OK;
     }
 
